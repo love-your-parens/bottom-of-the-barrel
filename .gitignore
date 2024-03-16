@@ -26,3 +26,4 @@
 /classes
 /target
 .portal
+/env/**/user.clj
