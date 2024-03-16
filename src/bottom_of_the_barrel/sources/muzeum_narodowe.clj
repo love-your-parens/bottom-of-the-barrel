@@ -1,4 +1,5 @@
 (ns bottom-of-the-barrel.sources.muzeum-narodowe
+  "Scapes all exhibitions currently advertised by Muzeum Narodowe."
   (:require [net.cgrand.enlive-html :as h]
             [clojure.string :as s]))
 
@@ -17,6 +18,9 @@
   (java.net.URL. url))
 
 (defn get-exhibitions-on-page
+  "Scrapes the provided page for all exhibition nodes.
+   Each is then scraped for relevant topics, e.g. exhibition title.
+   Note that there may be multiple matching child nodes per topic."
   [page]
   (filter
    #(let [i (first %)]
@@ -40,6 +44,7 @@
   )
 
 (defn get-exhibitions
+  "Retrieves all exhibitions from all known pages."
   []
   (reduce into
           (map get-exhibitions-on-page
