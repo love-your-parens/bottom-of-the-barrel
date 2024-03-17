@@ -77,8 +77,8 @@
    :name (-> title h/text s/trim)
    :description (s/trim (h/text (or (second descriptions) (first descriptions))))
    :date (parse-date-string (h/text dates))
-   :place (s/join " / " [(s/trim (h/text venue)) 
-                         (s/trim (h/text address))])})
+   :place (s/trim (h/text venue))
+   :address (s/trim (h/text address))})
 
 (defn exhibitions->maps
   [exhibitions]
@@ -89,5 +89,5 @@
    (get-exhibitions)))
 
 (comment
-  (fetch)
+  (tap> (fetch))
   )
