@@ -64,6 +64,7 @@
   {:url (absolute-url (get-in url [:attrs :href]))
    :thumbnail (get-in thumbnail [:attrs :src])
    :name (-> title h/text s/trim)
+   :type :museum
    :description (-> description h/text s/trim)
    :date (parse-date-string (h/text dates))
    :place "Manggha"

@@ -62,6 +62,7 @@
   {:url (url (get-in a [:attrs :href]))
    :thumbnail (url (get-in img [:attrs :src]))
    :name (h/text title)
+   :type :museum
    :date (parse-date-string (h/text date))
    :place (h/text (first (h/select place [:span :> :span])))})
 

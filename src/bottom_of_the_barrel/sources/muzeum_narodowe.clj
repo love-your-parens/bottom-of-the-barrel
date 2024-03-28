@@ -75,6 +75,7 @@
   {:url (absolute-url (get-in title [:attrs :href]))
    :thumbnail (get-in thumbnail [:attrs :src])
    :name (-> title h/text s/trim)
+   :type :museum
    :description (s/trim (h/text (or (second descriptions) (first descriptions))))
    :date (parse-date-string (h/text dates))
    :place (s/trim (h/text venue))

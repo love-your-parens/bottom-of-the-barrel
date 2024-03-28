@@ -149,7 +149,7 @@
      :url (str URL)
      :type :movie
      :place "Kino pod Baranami"
-     :dates (extract-screenings-from-page container)}))
+     :date (extract-screenings-from-page container)}))
 
 (comment
   (extract-movie-from-url
