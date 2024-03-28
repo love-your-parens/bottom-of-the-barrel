@@ -1,4 +1,5 @@
 (ns bottom-of-the-barrel.schema
+  "Specs for data collected by individual scrapers."
   (:require [clojure.spec.alpha :as s]))
 
 
