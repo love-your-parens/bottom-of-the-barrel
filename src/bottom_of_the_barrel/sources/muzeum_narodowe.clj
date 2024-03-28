@@ -1,7 +1,9 @@
 (ns bottom-of-the-barrel.sources.muzeum-narodowe
   "Scapes all exhibitions currently advertised by Muzeum Narodowe."
-  (:require [net.cgrand.enlive-html :as h]
-            [clojure.string :as s]))
+  (:require
+   [bottom-of-the-barrel.sources :refer [register-source!]]
+   [clojure.string :as s]
+   [net.cgrand.enlive-html :as h]))
 
 (def root-url "https://mnk.pl")
 
@@ -90,5 +92,8 @@
    (get-exhibitions)))
 
 (comment
-  (tap> (fetch))
+  (fetch)
   )
+
+;; NB: effects on load/require!
+(register-source! fetch)

@@ -1,7 +1,9 @@
 (ns bottom-of-the-barrel.sources.kino-pod-baranami
   "Scapes all movies currently screened in Kino Pod Baranami."
-  (:require [net.cgrand.enlive-html :as h]
-            [clojure.string :as s]))
+  (:require
+   [bottom-of-the-barrel.sources :refer [register-source!]]
+   [clojure.string :as s]
+   [net.cgrand.enlive-html :as h]))
 
 (def root-url "https://www.kinopodbaranami.pl/")
 
@@ -166,3 +168,6 @@
 (comment
   (fetch)
   )
+
+;; NB: effects on load/require!
+(register-source! fetch)

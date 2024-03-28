@@ -1,7 +1,9 @@
 (ns bottom-of-the-barrel.sources.manggha
   "Scapes all exhibitions currently advertised by Manggha museum."
-  (:require [net.cgrand.enlive-html :as h]
-            [clojure.string :as s]))
+  (:require
+   [bottom-of-the-barrel.sources :refer [register-source!]]
+   [clojure.string :as s]
+   [net.cgrand.enlive-html :as h]))
 
 (def root-url "https://manggha.pl")
 
@@ -80,3 +82,6 @@
 
 (comment
   (tap> (fetch)))
+
+;; NB: effects on load/require!
+(register-source! fetch)
