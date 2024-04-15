@@ -3,7 +3,19 @@
   (:require
    [bottom-of-the-barrel.sources :refer [register-source!]]
    [clojure.string :as s]
-   [net.cgrand.enlive-html :as h]))
+   [net.cgrand.enlive-html :as h]
+   [net.cgrand.jsoup :refer [->nodes]])
+  (:import [org.jsoup Jsoup]))
+
+;; Due to atypical encoding on the web page, enlive's default plumbing needs to get overriden.
+;; Note that Tagsoup (the default) gets replaced by Jsoup.
+(defn- parser
+  [stream]
+  (with-open [^java.io.Closeable stream stream]
+    (->nodes (Jsoup/parse stream "ISO-8859-2" ""))))
+
+(defn html-resource [URL]
+  (h/html-resource URL {:parser parser}))
 
 (def root-url "https://www.kinopodbaranami.pl/")
 
@@ -96,7 +108,7 @@
                               [:ul.when #{:div.head :div.cont}]))))
 
 (comment
-  (let [node (h/select (h/html-resource (second (get-movie-pages))) [:div.movie])]
+  (let [node (h/select (html-resource (second (get-movie-pages))) [:div.movie])]
     (scrape-screening-dates node)))
 
 (defn extract-screenings-from-scraped-date
@@ -113,7 +125,7 @@
 (comment
   (extract-screenings-from-scraped-date
    (first (scrape-screening-dates
-     (h/select (h/html-resource (second (get-movie-pages))) [:div.movie]))))
+     (h/select (html-resource (second (get-movie-pages))) [:div.movie]))))
   )
 
 (defn extract-screenings-from-page
@@ -124,13 +136,13 @@
 
 (comment
   (extract-screenings-from-page
-     (h/select (h/html-resource (second (get-movie-pages))) [:div.movie]))
+     (h/select (html-resource (second (get-movie-pages))) [:div.movie]))
   )
 
 (defn extract-movie-from-url
   "Extracts an exhibition map from a movie URL."
   [URL]
-  (let [container (h/select (h/html-resource URL)
+  (let [container (h/select (html-resource URL)
                             [:div.movie])]
     {:name (-> container
                 (h/select [[:h2 (h/but :.unas)]])
