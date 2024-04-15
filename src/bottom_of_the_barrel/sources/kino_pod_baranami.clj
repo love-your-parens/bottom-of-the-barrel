@@ -132,7 +132,7 @@
   [URL]
   (let [container (h/select (h/html-resource URL)
                             [:div.movie])]
-    {:title (-> container
+    {:name (-> container
                 (h/select [[:h2 (h/but :.unas)]])
                 h/texts
                 first
