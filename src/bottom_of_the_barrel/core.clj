@@ -6,10 +6,6 @@
             [bottom-of-the-barrel.sources.manggha]
             [bottom-of-the-barrel.sources.kino-pod-baranami]))
 
-(def ^:dynamic *cache-expiry* 300)
-(def !cache (atom {:time nil
-                  :content nil}))
-
 (defn fetch-all
   "Retrieves all events from all registered sources."
   []
@@ -17,23 +13,56 @@
 
 (comment
   (fetch-all)
-  )
+)
 
 (defn- now
   []
   (/ (System/currentTimeMillis) 1000))
 
+(def ^:dynamic *cache-expiry* 300)
+
+(defrecord Cache [time content])
+
+;; Perhaps move this to e.g. impl.cache to avoid sealing internals?
+(def cache
+  "Retrieves local cache.
+  If cache does not exist, it will be built.
+  If cache age exceeds given `max-age`, it will first be refreshed.
+  `max-age` is expressed in seconds."
+  (let [state (atom (delay (->Cache (now) (fetch-all))))
+        refresh-pending? (atom false)
+        valid? (fn [max-age] (when-let [t (:time @@state)]
+                               (> (+ t max-age) (now))))
+        refresh! #(when (compare-and-set! refresh-pending? false true)
+                    (let [p (promise)]
+                      (reset! state p)
+                      (future
+                        (try
+                          (let [content (fetch-all)
+                                result (->Cache (now) content)]
+                            (deliver p result))
+                          (catch Exception _
+                            (deliver p nil))
+                          (finally (reset! refresh-pending? false))))
+                      p))]
+    (fn [max-age]
+      (when-not (valid? max-age)
+        (refresh!))
+      @@state)))
+
+(comment
+  (let [c (cache 5)]
+    [(int (- (now) (:time c)))
+     (first (:content c))])
+  )
+
 (defn fetch-all-with-cache!
+  "Retrieves all events from all registered sources employing local cache.
+  Cache duration is defined by *cache-expiry*."
   []
-  (let [c @!cache]
-    (if (and (:content c)
-             (>= (+ (:time c) *cache-expiry*) (now)))
-      (:content c)
-      (:content (reset! !cache {:time (now)
-                               :content (fetch-all)})))))
+  (:content (cache *cache-expiry*)))
 
 (comment
   (binding [*cache-expiry* 30]
     (fetch-all-with-cache!))
-  (:time @!cache)
   )
