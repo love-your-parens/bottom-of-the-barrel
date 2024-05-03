@@ -4,7 +4,8 @@
             [bottom-of-the-barrel.sources.muzeum-krakowa]
             [bottom-of-the-barrel.sources.muzeum-narodowe]
             [bottom-of-the-barrel.sources.manggha]
-            [bottom-of-the-barrel.sources.kino-pod-baranami]))
+            [bottom-of-the-barrel.sources.kino-pod-baranami]
+            [bottom-of-the-barrel.sources.teatr-stary]))
 
 (defn fetch-all
   "Retrieves all events from all registered sources."
