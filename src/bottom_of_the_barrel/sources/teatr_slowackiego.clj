@@ -136,9 +136,9 @@
 (defn fetch
   "Retrieves all events."
   []
-  (get-plays
-   (get-day-nodes
-    (get-page))))
+  (reduce concat
+          (map get-plays (get-day-nodes
+                          (get-page)))))
 
 
 (comment
