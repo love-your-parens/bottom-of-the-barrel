@@ -11,7 +11,7 @@
 (defn fetch-all
   "Retrieves all events from all registered sources."
   []
-  (reduce concat (map #((val %)) @sources)))
+  (reduce concat (pmap #((val %)) @sources)))
 
 (comment
   (fetch-all)
