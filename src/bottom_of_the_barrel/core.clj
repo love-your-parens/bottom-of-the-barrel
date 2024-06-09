@@ -6,7 +6,8 @@
             [bottom-of-the-barrel.sources.manggha]
             [bottom-of-the-barrel.sources.kino-pod-baranami]
             [bottom-of-the-barrel.sources.teatr-stary]
-            [bottom-of-the-barrel.sources.teatr-slowackiego]))
+            [bottom-of-the-barrel.sources.teatr-slowackiego]
+            [bottom-of-the-barrel.sources.teatr-bagatela]))
 
 (defn fetch-all
   "Retrieves all events from all registered sources."
