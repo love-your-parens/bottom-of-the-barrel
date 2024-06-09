@@ -24,15 +24,15 @@
    Note that there may be multiple matching child nodes per topic."
   [page]
   (let [p (h/html-resource page)]
-    (map (fn [a b] (cons a b))
-         (h/select p [:a.item]) ;url
-         (for [container (h/select p [:div.content-bottom])]
-           (for [selector [[:header :h4] ;title
-                           [:div.paragraph-text] ;description
-                           [:figure :img] ;thumbnail
-                           [:span.date] ;dates
-                           ]]
-             (first (h/select container selector)))))))
+    (pmap (fn [a b] (cons a b))
+          (h/select p [:a.item]) ;url
+          (for [container (h/select p [:div.content-bottom])]
+            (for [selector [[:header :h4] ;title
+                            [:div.paragraph-text] ;description
+                            [:figure :img] ;thumbnail
+                            [:span.date] ;dates
+                            ]]
+              (first (h/select container selector)))))))
 
 (comment
   (get-exhibitions-on-page (url->URL (first seeds))))
@@ -72,13 +72,8 @@
    :place "Manggha"
    :address "ul. M. Konopnickiej 26 30-302 Kraków"})
 
-(defn exhibitions->maps
-  [exhibitions]
-  (map exhibition->map exhibitions))
-
 (defn fetch []
-  (exhibitions->maps
-   (get-exhibitions)))
+  (pmap exhibition->map (get-exhibitions)))
 
 (comment
   (tap> (fetch)))

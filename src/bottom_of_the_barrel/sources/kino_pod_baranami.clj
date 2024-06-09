@@ -172,7 +172,7 @@
 
 (defn retrieve-movies
   [URLs]
-  (map extract-movie-from-url URLs))
+  (pmap extract-movie-from-url URLs))
 
 (defn fetch []
   (retrieve-movies (get-movie-pages)))

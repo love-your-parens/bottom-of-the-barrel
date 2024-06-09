@@ -137,8 +137,8 @@
   "Retrieves all events."
   []
   (reduce concat
-          (map get-plays (get-day-nodes
-                          (get-page)))))
+          (pmap get-plays (get-day-nodes
+                           (get-page)))))
 
 
 (comment

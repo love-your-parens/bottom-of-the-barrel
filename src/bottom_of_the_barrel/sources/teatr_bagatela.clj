@@ -73,7 +73,7 @@
 (defn fetch
   "Retrieves all events."
   []
-  (map extract-play (get-play-nodes (get-page))))
+  (pmap extract-play (get-play-nodes (get-page))))
 
 
 (comment
