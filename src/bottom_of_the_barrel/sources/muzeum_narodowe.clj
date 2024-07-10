@@ -75,7 +75,7 @@
   "Converts a raw exhibition container into a structured map."
   [[[title] descriptions [thumbnail] [dates] [venue] [address]]]
   {:url (absolute-url (get-in title [:attrs :href]))
-   :thumbnail (get-in thumbnail [:attrs :src])
+   :thumbnail (absolute-url (get-in thumbnail [:attrs :src]))
    :name (-> title h/text s/trim)
    :type :museum
    :description (s/trim (h/text (or (second descriptions) (first descriptions))))
