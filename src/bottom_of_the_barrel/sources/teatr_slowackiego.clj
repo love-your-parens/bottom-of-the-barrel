@@ -44,7 +44,7 @@
 (defn day-node->date-string
   [day-node]
   (let [s (reduce str (h/texts (h/select day-node [:.day])))
-        [_ d m y] (re-find #"\s*(\d\d)\s*(\w+)\s*(\d+)" s)]
+        [_ d m y] (re-find #"\s*(\d\d)\s*([^\d\s]+)\s*(\d+)" s)]
     (format "%s %s %s" d m y)))
 
 
