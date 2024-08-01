@@ -13,6 +13,9 @@
 (defn fetch-all
   "Retrieves all events from all registered sources."
   []
+  ;; FIXME singular failures will crash the entire action!
+  ;; Must handle errors per-source. Ideally also per-node.
+  ;; Some logging would be nice.
   (reduce concat (pmap #((val %)) @sources)))
 
 (comment
