@@ -1,5 +1,6 @@
 (ns bottom-of-the-barrel.core
-  (:require [bottom-of-the-barrel.sources :refer [sources]]
+  (:require [clojure.tools.logging :as log]
+            [bottom-of-the-barrel.sources :refer [sources]]
             ;; For side-effects, i.e. self-registration:
             [bottom-of-the-barrel.sources.muzeum-krakowa]
             [bottom-of-the-barrel.sources.muzeum-narodowe]
@@ -10,13 +11,25 @@
             [bottom-of-the-barrel.sources.teatr-bagatela]
             [bottom-of-the-barrel.sources.teatr-stu]))
 
+
+(defn fetch-one!
+  "Given a dereferenced(!) source - calls it and returns the result.
+  Catches & logs errors."
+  [source]
+  (try
+    ((val source))
+    (catch Exception e
+      (log/error e))))
+
+(comment
+  (fetch-one! (first @sources))
+)
+
+
 (defn fetch-all
   "Retrieves all events from all registered sources."
   []
-  ;; FIXME singular failures will crash the entire action!
-  ;; Must handle errors per-source. Ideally also per-node.
-  ;; Some logging would be nice.
-  (reduce concat (pmap #((val %)) @sources)))
+  (reduce concat (pmap fetch-one! @sources)))
 
 (comment
   (fetch-all)
