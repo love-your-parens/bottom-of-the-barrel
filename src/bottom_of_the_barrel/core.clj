@@ -35,9 +35,11 @@
   (fetch-all)
 )
 
+
 (defn- now
   []
   (/ (System/currentTimeMillis) 1000))
+
 
 (def ^:dynamic *cache-expiry* 300)
 
@@ -75,6 +77,7 @@
     [(int (- (now) (:time c)))
      (first (:content c))])
   )
+
 
 (defn fetch-all-with-cache!
   "Retrieves all events from all registered sources employing local cache.
