@@ -9,7 +9,8 @@
             [bottom-of-the-barrel.sources.teatr-stary]
             [bottom-of-the-barrel.sources.teatr-slowackiego]
             [bottom-of-the-barrel.sources.teatr-bagatela]
-            [bottom-of-the-barrel.sources.teatr-stu]))
+            [bottom-of-the-barrel.sources.teatr-stu]
+            [bottom-of-the-barrel.sources.zamek-wawelski]))
 
 
 (defn fetch-one!
