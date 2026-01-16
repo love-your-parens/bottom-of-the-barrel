@@ -12,7 +12,7 @@
   (str root-url relative-url))
 
 (def seeds (map absolute-url
-                ["/wystawy-czasowe"]))
+                ["/wystawy-biezace"]))
 
 (defn url->URL
   [url]
