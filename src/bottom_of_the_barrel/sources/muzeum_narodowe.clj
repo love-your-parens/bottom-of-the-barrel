@@ -1,99 +1,122 @@
 (ns bottom-of-the-barrel.sources.muzeum-narodowe
-  "Scapes all exhibitions currently advertised by Muzeum Narodowe."
+  "Scrapes all events currently advertised by Muzeum Narodowe.
+
+  Needed to be rebuilt following a redesign of the source portal.
+  Far less effective than before since the new page relies a
+  whole lot on JS/AJAX to load content, which we can't do
+  without something like a headless browser – Selenium etc.
+  Results are thus limited to events above the fold."
   (:require
    [bottom-of-the-barrel.sources :refer [register-source!]]
    [clojure.string :as s]
    [net.cgrand.enlive-html :as h]))
 
+
 (def root-url "https://mnk.pl")
+
 
 (defn absolute-url
   [relative-url]
   (str root-url relative-url))
 
+
 (def seeds (map absolute-url
-                ["/wystawy/czasowe"
-                 "/wystawy/stale"]))
+                ["/wystawy-category/wystawa-stala"
+                 "/wystawy-category/wystawa-czasowa"]))
+
 
 (defn url->URL
   [url]
   (java.net.URL. url))
 
-(defn get-exhibitions-on-page
-  "Scrapes the provided page for all exhibition nodes.
-   Each is then scraped for relevant topics, e.g. exhibition title.
-   Note that there may be multiple matching child nodes per topic."
+
+(defn get-event-nodes-on-page
+  "Scrapes the provided page for all event nodes. "
   [page]
-  (filter
-   #(let [i (first %)]
-      (if (sequential? i) (seq i) i))
-   (for [container (h/select
-                    (h/html-resource page)
-                    [:#content-page :li])]
-     (for [selector [[:.title :a] ;title+url
-                     #{[:p] [:.description]} ;descriptions
-                     [:a :img] ;thumbnail
-                     [:.event-time] ;dates
-                     [:.place] ;map
-                     [:span.street] ;address
-                     ]]
-       ;; NB: each selection is a seq!
-       (h/select container selector)))))
+  (h/select (h/html-resource page) [:#post-wystawy-results :.article-card--wystawy]))
 
-(comment
-  (get-exhibitions-on-page (url->URL (first seeds)))
-  (get-exhibitions-on-page (url->URL (second seeds)))
-  )
 
-(defn get-exhibitions
-  "Retrieves all exhibitions from all known pages."
+(defn get-event-nodes
+  "Retrieves all event nodes from all known pages."
   []
-  (reduce into
-          (map get-exhibitions-on-page
-               (map url->URL seeds))))
+  (reduce into (map get-event-nodes-on-page
+                    (map url->URL seeds))))
 
-(comment
-  (get-exhibitions)
-  )
 
 (defn parse-date-string
   "Converts a date string to a range of java.time.LocalDate objects."
-  [date]
-  (let [rs (take 2 (re-seq #"[0-9]+\.[0-9]+\.[0-9]+"
-                           (s/replace date "\n" "")))]
-    (for [r rs]
-      (when r
-        (let [[day month year] (map #(Integer/parseInt %) (s/split r #"\."))]
-          (java.time.LocalDate/of year month day))))))
-
+  [date-string]
+  (let [^java.time.format.DateTimeFormatter dtf (doto (java.time.format.DateTimeFormatter/ofLocalizedDate
+                                                       java.time.format.FormatStyle/LONG)
+                                                  (.withLocale (java.util.Locale. "pl")))
+        range (-> date-string (s/split #" – "))]
+    (for [r range]
+      (when r (java.time.LocalDate/parse r dtf)))))
 
 (comment
-  (parse-date-string "\n                        16.02.2024\n                        04.08.2024\n                    ")
-  )
+  (parse-date-string "29 stycznia 2026 – 31 grudnia 2026"))
 
-(defn exhibition->map
-  "Converts a raw exhibition container into a structured map."
-  [[[title] descriptions [thumbnail] [dates] [venue] [address]]]
-  {:url (absolute-url (get-in title [:attrs :href]))
-   :thumbnail (absolute-url (get-in thumbnail [:attrs :src]))
-   :name (-> title h/text s/trim)
+
+(defn get-name
+  [event-node]
+  (-> (h/select event-node [:.article-title :h3]) first h/text))
+
+
+(defn get-url
+  [event-node]
+  (-> (h/select event-node [:a.article-card-inner]) first :attrs :href))
+
+
+(defn get-thumbnail
+  [event-node]
+  (-> (h/select event-node [:.featured-image :img]) first :attrs :src))
+
+
+(defn get-description
+  [event-node]
+  (when-let [url (get-url event-node)]
+    (let  [page (h/html-resource (url->URL url))]
+      (s/join (->> (h/select page [:.main-wrap-content])
+                   h/texts
+                   (map s/trim))))))
+
+
+(defn get-address
+  [event-node]
+  (-> (h/select event-node [:.place-cat]) first h/text (s/replace-first #"Lokalizacja:" "") s/trim))
+
+
+(defn get-dates
+  [event-node]
+  (when-let [s (some-> (h/select event-node [:.date-sec]) first h/text s/trim)]
+    (when (not (s/blank? s))
+      (parse-date-string s))))
+
+
+(defn event-node->event-map
+  "Converts a raw event node container into a structured map."
+  [event-node]
+  {:url (get-url event-node)
+   :thumbnail (get-thumbnail event-node)
+   :name (get-name event-node)
    :type :museum
-   :description (s/trim (h/text (or (second descriptions) (first descriptions))))
-   :date (parse-date-string (h/text dates))
-   :place (s/trim (h/text venue))
-   :address (s/trim (h/text address))})
+   :description (get-description event-node)
+   :date (get-dates event-node)
+   :place "Muzeum Narodowe w Krakowie"
+   :address (get-address event-node)})
 
-(defn exhibitions->maps
-  [exhibitions]
-  (map exhibition->map exhibitions))
 
 (defn fetch []
-  (exhibitions->maps 
-   (get-exhibitions)))
+  (pmap event-node->event-map (get-event-nodes)))
+
 
 (comment
-  (fetch)
-  )
+  ;; simple test
+  (require '[bottom-of-the-barrel.schema]
+           '[clojure.spec.alpha :as spec])
+  (every? (partial spec/valid? :bottom-of-the-barrel.schema/event)
+          (fetch)))
+
 
 ;; NB: effects on load/require!
 (register-source! fetch)
