@@ -3,8 +3,7 @@
   (:require
    [bottom-of-the-barrel.sources :refer [register-source!]]
    [clojure.string :as s]
-   [net.cgrand.enlive-html :as h]
-   [bottom-of-the-barrel.schema :as schema]))
+   [net.cgrand.enlive-html :as h]))
 
 
 (def zone-id (java.time.ZoneId/of "Europe/Warsaw"))
@@ -188,9 +187,10 @@
 
 (comment
   "Spec check"
-  (require '[clojure.spec.alpha :as spec])
-  (spec/explain ::schema/event (first (fetch)))
-  (every? (partial spec/valid? ::schema/event) (fetch)))
+  (require '[clojure.spec.alpha :as spec]
+           '[bottom-of-the-barrel.schema])
+  (spec/explain :bottom-of-the-barrel.schema/event (first (fetch)))
+  (every? (partial spec/valid? :bottom-of-the-barrel.schema/event) (fetch)))
 
 
 (register-source! fetch)
