@@ -81,9 +81,9 @@
                    (map s/trim))))))
 
 
-(defn get-address
+(defn get-location
   [event-node]
-  (-> (h/select event-node [:.place-cat]) first h/text (s/replace-first #"Lokalizacja:" "") s/trim))
+  (some-> (h/select event-node [:.place-cat]) first h/text (s/replace-first #"Lokalizacja:" "") s/trim))
 
 
 (defn get-dates
@@ -102,8 +102,8 @@
    :type :museum
    :description (get-description event-node)
    :date (get-dates event-node)
-   :place "Muzeum Narodowe w Krakowie"
-   :address (get-address event-node)})
+   :place (str "MNK " (get-location event-node))
+   :address nil})
 
 
 (defn fetch []
