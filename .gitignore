@@ -27,3 +27,4 @@
 /target
 .portal
 /env/**/user.clj
+/.DS_Store
